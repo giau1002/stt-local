@@ -1,0 +1,15 @@
+fastapi==0.144.0
+uvicorn==0.54.0
+websockets==17.2
+sqlalchemy==2.1.5
+psycopg[binary]==3.3.6
+itsdangerous==2.2.0
+numpy==2.5.4
+sherpa-onnx==1.13.8
+sentencepiece==0.2.2
+huggingface-hub==2.2.0
+soundfile==0.14.0
+scipy==1.18.1
+librosa==0.11.0
+httpx==0.28.1
+transformers @ https://github.com/huggingface/transformers/archive/d4804f9d76b8c071b993d813e9e87067b780cbee.zip

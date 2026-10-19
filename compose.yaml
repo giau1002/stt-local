@@ -1,0 +1,55 @@
+services:
+  api:
+    build: .
+    image: vietvoice-local:0.1
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://vietvoice:${POSTGRES_PASSWORD:?Run scripts/bootstrap.py}@db:5432/vietvoice
+    ports: ["127.0.0.1:8080:8080"]
+    volumes: ["./models:/models:ro"]
+    gpus: all
+    networks: [private]
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health/ready')"]
+      interval: 30s
+      timeout: 5s
+      start_period: 180s
+      retries: 3
+    stop_grace_period: 60s
+    security_opt: ["no-new-privileges:true"]
+    tmpfs: [/tmp]
+  db:
+    image: postgres:17.6-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vietvoice
+      POSTGRES_DB: vietvoice
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run scripts/bootstrap.py}
+    volumes: ["postgres_data:/var/lib/postgresql/data"]
+    networks: [private]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vietvoice -d vietvoice"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  download:
+    image: vietvoice-local:0.1
+    profiles: [setup]
+    user: "0:0"
+    environment:
+      HF_HUB_OFFLINE: "0"
+      TRANSFORMERS_OFFLINE: "0"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+    volumes: ["./models:/models"]
+    command: ["python", "scripts/download_models.py", "--output", "/models"]
+    networks: [download]
+volumes:
+  postgres_data:
+networks:
+  private:
+    internal: true
+  download:

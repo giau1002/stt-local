@@ -1,0 +1,5 @@
+{$VV_DOMAIN:localhost} {
+    tls internal
+    encode gzip
+    reverse_proxy api:8080
+}

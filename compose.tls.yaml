@@ -1,0 +1,18 @@
+services:
+  proxy:
+    image: caddy:2.10.2-alpine
+    restart: unless-stopped
+    environment:
+      VV_DOMAIN: ${VV_DOMAIN:-localhost}
+    ports: ["443:443", "443:443/udp"]
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [private, edge]
+    depends_on: [api]
+volumes:
+  caddy_data:
+  caddy_config:
+networks:
+  edge:
